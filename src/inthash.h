@@ -4,6 +4,8 @@
  * created by Maxim Kirkman <max.kirkman94@gmail.com>
  */
 
+#ifndef INTHASH_H
+#define INTHASH_H
 
 #include <stdint.h>
 
@@ -16,8 +18,9 @@
 typedef uint64_t int64 ;
 
 // first hash function
-int h1(int64 k, int64 p) ;
+int h1(int64 k) ;
 
 // second hash function
-int h2(int64 k, int64 p) ;
+int h2(int64 k) ;
 
+#endif

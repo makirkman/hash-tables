@@ -5,7 +5,6 @@
  */
 
 #include <math.h>
-
 #include "inthash.h"
 
 // constants for respective hash function (arbitrary primes)
@@ -18,11 +17,11 @@
 #define p2 2147483629
 
 // first hash function
-int h1(int64 k, int64 m) {
-	return ((k * A1 + B1) % p1) % m ;
+int h1(int64 k) {
+	return (k * A1 + B1) % p1 ;
 }
 
 // second hash function
-int h2(int64 k, int64 m) {
-	return ((k * A2 + B2) % p2) % m ;
+int h2(int64 k) {
+	return (k * A2 + B2) % p2 ;
 }
