@@ -150,7 +150,7 @@ static void in_table_insert(CuckooHashTable *hash_table, InnerTable *table,
  * main functions
  */
 
-// initialise a cuckoo hash table with the given parameters
+// initialise a cuckoo hash table with the given size
 CuckooHashTable *new_cuckoo_hash_table(int size) {
 
 	CuckooHashTable *hash_table = malloc((sizeof *hash_table) * size) ;
