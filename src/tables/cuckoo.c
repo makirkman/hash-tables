@@ -304,7 +304,7 @@ void cuckoo_hash_table_stats(CuckooHashTable *hash_table) {
 
 	printf("\n----- table stats -----\n") ;
 
-	//print table info
+	//print high level cuckoo table info
 	printf("\n    --- overall ---\n") ;
 	printf("CPU time spent:\t\t%.6f sec\n", seconds) ;
 	printf("total size:\t\t%d slots\n", hash_table->size * 2) ;
@@ -314,6 +314,7 @@ void cuckoo_hash_table_stats(CuckooHashTable *hash_table) {
 	  total_load * 100.0 / (hash_table->size * 2)) ;
 	printf("    ---------------\n") ;
 
+	// print internal table info
 	printf("\n    ---  inner  ---\n") ;
 	printf("table 1:\n") ;
 	printf("  load:\t\t%d items\n", hash_table->table1->load) ;
