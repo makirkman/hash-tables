@@ -27,4 +27,4 @@ The top of the `src` folder contains the interface for using and accessing the p
 
 Program by Maxim Kirkman, max.kirkman94@gmail.com.
 
-The interpreter, general table wrapping, and print behaviour was written following tutorials & similar files made by others; actual table behaviour (the tables folder) was written alone.
+The interpreter, general table wrapping, and print behaviour was largely already provided; actual table behaviour (the tables folder) was written alone, with the framework as a starter.

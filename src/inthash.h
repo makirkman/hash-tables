@@ -1,7 +1,7 @@
 /* * * * * * * * *
  * Hash functions for 64-bit unsigned integers
  *
- * created by Maxim Kirkman <max.kirkman94@gmail.com>
+ * created by Maxim Kirkman <max.kirkman94@gmail.com>, following Matt Farrugia
  */
 
 #ifndef INTHASH_H

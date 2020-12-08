@@ -2,7 +2,7 @@
  * Interface for accessing and manipulating hash table data structures of
  *  any type
  *
- * created by Maxim Kirkman <max.kirkman94@gmail.com>
+ * created by Maxim Kirkman <max.kirkman94@gmail.com>, following Matt Farrugia
  */
 
 #ifndef HASHTBL_H
