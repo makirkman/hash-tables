@@ -84,22 +84,13 @@ static void initialise_in_table(InnerTable *table) {
 	table->id = 0 ;
 }
 
-// cleanly inserts key into table at address
-//  for use only when address is known to be empty
-static void clean_xuck_insert(InnerTable *table, int address, int64 key) {
-	table->buckets[address]->key = key ;
-	table->buckets[address]->full = true ;
-	table->nkeys++ ;
-}
-
 // after splitting a bucket & removing its key, reinserts that key into table
 static void reinsert(InnerTable *table, int64 key) {
 	int address ;
 	/* find if key was in table1 or table2 */
 	if (table->id == 1) {
 		address = rightmostnbits(table->depth, h1(key)) ;
-	}
-	else {
+	} else {
 		address = rightmostnbits(table->depth, h2(key)) ;
 	}
 	/* ----------------------------------- */
@@ -188,8 +179,12 @@ static void split_xuck_bucket(XuckooHashTable *hash_table, InnerTable *table, in
 }
 
 // inserts key into table
+// if the address is already taken, bumps the pre-existing key to the other
+//  table, continuing this process recursively.
+// uses a count variable to guess whether it has made too many recursive calls,
+//  and if so, doubles the table
 static void in_table_insert(XuckooHashTable *hash_table, InnerTable *table,
-  int64 key, int count) {
+  InnerTable *other_table, int64 key, int count) {
 
 	count++ ;
 	/* find hash & address depending on which table was passed */
@@ -202,43 +197,35 @@ static void in_table_insert(XuckooHashTable *hash_table, InnerTable *table,
 	int address = rightmostnbits(table->depth, hash) ;
 	/* ------------------------------------------------------- */
 
+	// if the address is free, insert the key immediately
+	if (!table->buckets[address]->full) {
+		table->buckets[address]->key = key ;
+		table->buckets[address]->full = true ;
+		table->nkeys++ ;
+		return ;
+	}
+
+	// a key is already present, insert anyway & store the old key
+	int64 old_key = table->buckets[address]->key ;
+	table->buckets[address]->key = key ;
+
 	/* if count reaches a lower limit AND is at a bucket with
 		more potential pointers, split bucket                 */
 	if (count >= FIRST_COUNT_MAX &&
 		(table->buckets[address]->depth != table->depth)) {
-		while (table->buckets[address]->full) {
-			split_xuck_bucket(hash_table, table, address) ;
-			address = rightmostnbits(table->depth, hash) ;
-		}
+		split_xuck_bucket(hash_table, table, address) ;
 	}
 	/* ------------------------------------------------------ */
 
 	/* if count reaches a larger limit, split current
 		bucket regardless of potential pointers       */
-	else if (count >= FINAL_COUNT_MAX) {
-		while (table->buckets[address]->full) {
-			split_xuck_bucket(hash_table, table, address) ;
-			address = rightmostnbits(table->depth, hash) ;
-		}
+	if (count >= FINAL_COUNT_MAX) {
+		split_xuck_bucket(hash_table, table, address) ;
 	}
 	/* ---------------------------------------------- */
 
-	// insert key into table
-	if (!table->buckets[address]->full) {
-		clean_xuck_insert(table, address, key) ;
-	}
-	// if a key is already present, insert & move old key to other table
-	else {
-		int64 old_key = table->buckets[address]->key ;
-		table->buckets[address]->key = key ;
-		if (table->id == 1) {
-			in_table_insert(hash_table, hash_table->table2, old_key, count) ;
-		}
-		else if (table->id == 2) {
-			in_table_insert(hash_table, hash_table->table1, old_key, count) ;
-		}
-	}
-
+	// try to re-insert the old key in the other table
+	in_table_insert(hash_table, other_table, table, old_key, count) ;
 }
 
 /* * * *
@@ -292,7 +279,6 @@ void free_xuckoo_hash_table(XuckooHashTable *hash_table) {
 	/* -------------------------------------------- */
 }
 
-
 // inserts a new key into an extendible cuckoo hash table
 // returns true if successful, false if the key was already present
 bool xuckoo_hash_table_insert(XuckooHashTable *hash_table, int64 key) {
@@ -317,44 +303,17 @@ bool xuckoo_hash_table_insert(XuckooHashTable *hash_table, int64 key) {
 	/* --------------------------------------- */
 
 	/* insert in table with smallest number of keys */
-	// table 1 is smallest
 	if (hash_table->table1->nkeys <= hash_table->table2->nkeys) {
-
-		// insert key into table
-		if (!hash_table->table1->buckets[address_1]->full) {
-			clean_xuck_insert(hash_table->table1, address_1, key) ;
-			hash_table->time += clock() - start_time ;
-			return true ;
-		}
-		// if a key is already present, insert & move old key to other table
-		else {
-			int64 old_key = hash_table->table1->buckets[address_1]->key ;
-			hash_table->table1->buckets[address_1]->key = key ;
-			in_table_insert(hash_table, hash_table->table2, old_key, 0) ;
-
-			hash_table->time += clock() - start_time ;
-			return true ;
-		}
+		in_table_insert(hash_table, hash_table->table1,
+		  hash_table->table2, key, 0) ;
+	} else {
+		in_table_insert(hash_table, hash_table->table2,
+		  hash_table->table1, key, 0) ;
 	}
-	// table 2 is smallest
-	else {
-		// insert key into table
-		if (!hash_table->table2->buckets[address_2]->full) {
-			clean_xuck_insert(hash_table->table2, address_2, key) ;
-			hash_table->time += clock() - start_time ;
-			return true ;
-		}
-		// if a key is already present, insert & move old key to other table
-		else {
-			int64 old_key = hash_table->table2->buckets[address_2]->key ;
-			hash_table->table2->buckets[address_2]->key = key ;
-			in_table_insert(hash_table, hash_table->table1, old_key, 0) ;
 
-			hash_table->time += clock() - start_time ;
-			return true ;
-		}
-	}
-	/* -------------------------------------------- */
+	hash_table->time += clock() - start_time ;
+	return true ;
+		/* -------------------------------------------- */
 }
 
 

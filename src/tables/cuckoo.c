@@ -51,16 +51,6 @@ static void initialise_in_table(InnerTable *table, int size) {
 
 }
 
-// cleanly inserts a key into the given table, at hash index
-//  for use only when address is known to be empty
-static void clean_insert(InnerTable *table, int64 key, int hash) {
-	assert(table->inuse[hash] == false) ;
-
-	table->slots[hash] = key ;
-	table->inuse[hash] = true ;
-	table->load++ ;
-}
-
 // doubles cuckoo hash table size & rehashes its contents
 static void double_cuckoo_table(CuckooHashTable *hash_table) {
 
@@ -80,7 +70,7 @@ static void double_cuckoo_table(CuckooHashTable *hash_table) {
 	hash_table->size = n_size ;
 
 	// rehash old contents
-	int i;
+	int i ;
 	for (i = 0; i<o_size; i++) {
 		if (old_inuse_table1[i]) {
 			cuckoo_hash_table_insert(hash_table, old_slots_table1[i]) ;
@@ -99,7 +89,7 @@ static void double_cuckoo_table(CuckooHashTable *hash_table) {
 // inserts a given key into a table & displaces the old key into the other table
 //  if the current key has been tried before, doubles & rehashes both tables
 static void in_table_insert(CuckooHashTable *hash_table, InnerTable *table,
-  int64 cur_key, int64 init_key) {
+  InnerTable *other_table, int64 cur_key, int64 init_key) {
 
 	// double hash table & insert key if loop detected
 	if (cur_key == init_key) {
@@ -108,42 +98,28 @@ static void in_table_insert(CuckooHashTable *hash_table, InnerTable *table,
 		return ;
 	}
 
-	// table size is fine, move to insertion
-	int v = h1(cur_key) % hash_table->size ;
-	int w = h2(cur_key) % hash_table->size ;
-
-	// inserting into table 1
+	/* table size is fine, perform insertion */
+	int address ;
 	if (table->id == 1) {
-		// insert key and return if slot is empty
-		if (!hash_table->table1->inuse[v]) {
-			clean_insert(hash_table->table1, cur_key, v) ;
-			return ;
-		}
-
-		// otherwise insert anyway, but move old key to table2
-		else {
-			int64 old_key = hash_table->table1->slots[v] ;
-			hash_table->table1->slots[v] = cur_key ;
-
-			in_table_insert(hash_table, hash_table->table2, old_key, init_key) ;
-		}
+		address = h1(cur_key) % hash_table->size ;
+	} else {
+		address = h2(cur_key) % hash_table->size ;
 	}
-	// inserting into table 2
-	else if (table->id == 2) {
-		// insert key and return if slot is empty
-		if (!hash_table->table2->inuse[w]) {
-			clean_insert(hash_table->table2, cur_key, w) ;
-			return ;
-		}
 
-		// otherwise insert anyway, but move old key to table1
-		else {
-			int64 old_key = hash_table->table2->slots[w] ;
-			hash_table->table2->slots[w] = cur_key ;
-
-			in_table_insert(hash_table, hash_table->table1, old_key, init_key) ;
-		}
+	// insert key and return if slot is empty
+	if (!table->inuse[address]) {
+		table->slots[address] = cur_key ;
+		table->inuse[address] = true ;
+		table->load++ ;
+		return ;
 	}
+
+	// try to re-insert the old key in the other table
+	int64 old_key = table->slots[address] ;
+	table->slots[address] = cur_key ;
+
+	in_table_insert(hash_table, other_table, table, old_key, init_key) ;
+	/* ------------------------------------- */
 }
 
 /* * * *
@@ -198,7 +174,6 @@ bool cuckoo_hash_table_insert(CuckooHashTable *hash_table, int64 key) {
 
 	/* insert key in table1 slot if empty */
 	if (!hash_table->table1->inuse[v]) {
-
 		hash_table->table1->slots[v] = key ;
 		hash_table->table1->inuse[v] = true ;
 		hash_table->table1->load++ ;
@@ -210,7 +185,7 @@ bool cuckoo_hash_table_insert(CuckooHashTable *hash_table, int64 key) {
 			   
 			   // 1st slot is taken
 	/* check if key is already in either table */
-	else if (hash_table->table1->slots[v] == key) {
+	if (hash_table->table1->slots[v] == key) {
 		hash_table->time += clock() - start_time ;
 		return false ;
 	}
@@ -222,14 +197,13 @@ bool cuckoo_hash_table_insert(CuckooHashTable *hash_table, int64 key) {
 	/* --------------------------------------- */
 
 	/* if not, place key in table1 and move old key to table2 */
-	else {
-		int64 old_key = hash_table->table1->slots[v] ;
-		hash_table->table1->slots[v] = key ;
-		in_table_insert(hash_table, hash_table->table2, old_key, key) ;
+	int64 old_key = hash_table->table1->slots[v] ;
+	hash_table->table1->slots[v] = key ;
+	in_table_insert(hash_table, hash_table->table2,
+		hash_table->table1, old_key, key) ;
 
-		hash_table->time += clock() - start_time ;
-		return true ;
-	}
+	hash_table->time += clock() - start_time ;
+	return true ;
 	/* ------------------------------------------------------ */
 }
 
