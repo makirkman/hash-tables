@@ -140,7 +140,7 @@ CuckooHashTable *new_cuckoo_hash_table(int size) {
 	hash_table->table1->id = 1 ;
 	hash_table->table2->id = 2 ;
 	/* -------------------------------------------- */
-	
+
 	// prepare high level details
 	hash_table->size = size ;
 	hash_table->time = 0 ;
@@ -182,7 +182,7 @@ bool cuckoo_hash_table_insert(CuckooHashTable *hash_table, int64 key) {
 		return true ;
 	}
 	/* ---------------------------------- */
-			   
+
 			   // 1st slot is taken
 	/* check if key is already in either table */
 	if (hash_table->table1->slots[v] == key) {
@@ -241,9 +241,9 @@ void cuckoo_hash_table_print(CuckooHashTable *hash_table) {
 	// print header
 	printf("                    table one         table two\n") ;
 	printf("                  key | address     address | key\n") ;
-	
+
 	// print rows of each table
-	int i;
+	int i ;
 	for (i = 0; i < hash_table->size; i++) {
 
 		// table 1 key

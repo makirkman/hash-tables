@@ -209,7 +209,7 @@ bool xtndbln_hash_table_insert(XtndblNHashTable *table, int64 key) {
 	if (b_nkeys > 0) {
 		for (i=0; i<b_nkeys; i++) {
 			if (table->buckets[address]->keys[i] == key) {
-				table->stats.time += clock() - start_time;
+				table->stats.time += clock() - start_time ;
 				return false ;
 			}
 		}
@@ -261,39 +261,38 @@ bool xtndbln_hash_table_lookup(XtndblNHashTable *table, int64 key) {
 
 // prints the contents of an extendible hash table to stdout
 void xtndbln_hash_table_print(XtndblNHashTable *table) {
-	assert(table);
-	printf("--- table size: %d\n", table->size);
+	assert(table) ;
+	printf("--- table size: %d\n", table->size) ;
 
 	// print header
-	printf("  table:               buckets:\n");
-	printf("  address | bucketid   bucketid [key]\n");
+	printf("  table:               buckets:\n") ;
+	printf("  address | bucketid   bucketid [key]\n") ;
 	
 	// print table and buckets
-	int i;
+	int i ;
 	for (i = 0; i < table->size; i++) {
 		// table entry
-		printf("%9d | %-9d ", i, table->buckets[i]->id);
+		printf("%9d | %-9d ", i, table->buckets[i]->id) ;
 
 		// if this is the first address at which a bucket occurs, print it now
 		if (table->buckets[i]->id == i) {
-			printf("%9d ", table->buckets[i]->id);
+			printf("%9d ", table->buckets[i]->id ;
 
 			// print the bucket's contents
-			printf("[");
+			printf("[") ;
 			for(int j = 0; j < table->bucketsize; j++) {
 				if (j < table->buckets[i]->nkeys) {
-					printf(" %llu", table->buckets[i]->keys[j]);
+					printf(" %llu", table->buckets[i]->keys[j]) ;
 				} else {
-					printf(" -");
+					printf(" -") ;
 				}
 			}
-			printf(" ]");
+			printf(" ]") ;
 		}
-		// end the line
-		printf("\n");
+		printf("\n") ;
 	}
 
-	printf("--- end table ---\n");
+	printf("--- end table ---\n") ;
 }
 
 // prints statistics about an extendible hash table to stdout
@@ -307,7 +306,7 @@ void xtndbln_hash_table_stats(XtndblNHashTable *table) {
 	printf("number of keys    :\t%d\n", table->stats.nkeys) ;
 	printf("number of buckets :\t%d\n\n", table->stats.nbuckets) ;
 	printf("space usage factor:\t%.3f%%\n", table->stats.nkeys * 100.0 /
-	  (table->size * table->bucketsize));
+	  (table->size * table->bucketsize)) ;
 	printf("bucket size       :\t%d\n", table->bucketsize) ;
 
 	// calculate print time details
