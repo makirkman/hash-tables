@@ -17,14 +17,13 @@
 
 // get a TableType constant from a string representation:
 TableType strtotype(char *str) {
-	// TODO: Verify this
-	if (strcmp("cuckoo",  str) == 0) {
+	if (strcmp("0", str) == 0 || strcmp("cuckoo",  str) == 0) {
 		return CUCKOO ;
 	}
-	if (strcmp("xtndbln", str) == 0) {
+	if (strcmp("1", str) == 0 || strcmp("xtndbln", str) == 0) {
 		return XTNDBLN ;
 	}
-	if (strcmp("xuckoo",  str) == 0) {
+	if (strcmp("2", str) == 0 || strcmp("xuckoo",  str) == 0) {
 		return XUCKOO ;
 	}
 	return NOTYPE ;
@@ -65,6 +64,28 @@ HashTable *new_hash_table(TableType type, int size) {
 	return table ;
 }
 
+// free all memory associated with a given table
+void free_hash_table(HashTable *table) {
+	assert(table != NULL) ;
+
+	switch (table->type) {
+		case CUCKOO:
+			free_cuckoo_hash_table(table->table) ;
+			break ;
+		case XTNDBLN:
+			free_xtndbln_hash_table(table->table) ;
+			break ;
+		case XUCKOO:
+			free_xuckoo_hash_table(table->table) ;
+			break ;
+		default:
+			break ;
+	}
+
+	// free the wrapper as well
+	free(table) ;
+}
+
 // insert a new key into a table
 // returns true if successful, false if the key was already present
 bool hash_table_insert(HashTable *table, int64 key) {
@@ -97,28 +118,6 @@ bool hash_table_lookup(HashTable *table, int64 key) {
 		default:
 			return false ;
 	}
-}
-
-// free all memory associated with a given table
-void free_hash_table(HashTable *table) {
-	assert(table != NULL) ;
-
-	switch (table->type) {
-		case CUCKOO:
-			free_cuckoo_hash_table(table->table) ;
-			break ;
-		case XTNDBLN:
-			free_xtndbln_hash_table(table->table) ;
-			break ;
-		case XUCKOO:
-			free_xuckoo_hash_table(table->table) ;
-			break ;
-		default:
-			break ;
-	}
-
-	// free the wrapper as well
-	free(table) ;
 }
 
 // print the contents of a table to stdout

@@ -24,6 +24,9 @@ typedef struct table HashTable ;
 // initialise a hash table with the given paramaters and return its pointer
 HashTable *new_hash_table(TableType type, int size) ;
 
+// free all memory associated with a given table
+void free_hash_table(HashTable *table) ;
+
 // insert a new key into a table
 // returns true if successful, false if the key was already present
 bool hash_table_insert(HashTable *table, int64 key) ;
@@ -31,9 +34,6 @@ bool hash_table_insert(HashTable *table, int64 key) ;
 // lookup whether a key is inside a table
 // returns true if found, false if not
 bool hash_table_lookup(HashTable *table, int64 key) ;
-
-// free all memory associated with a given table
-void free_hash_table(HashTable *table) ;
 
 // print the contents of a table to stdout
 void hash_table_print(HashTable *table) ;

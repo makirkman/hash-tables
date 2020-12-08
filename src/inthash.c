@@ -1,5 +1,5 @@
 /* * * * * * * * *
- * Gash functions for 64-bit unsigned integers
+ * Hash functions for 64-bit unsigned integers
  *
  * created by Maxim Kirkman <max.kirkman94@gmail.com>
  */
