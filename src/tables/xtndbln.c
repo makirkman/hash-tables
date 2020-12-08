@@ -19,27 +19,27 @@
 // it also knows how many bits are shared between possible keys, and the first 
 // table address that references it
 typedef struct xtndbln_bucket {
-	int id ;		// a unique id for this bucket, equal to the first address
-					// in the table which points to it
-	int depth ;		// number of hash value bits being used by this bucket
-	int nkeys ;		// number of keys currently contained in this bucket
-	int64 *keys ;	// the keys stored in this bucket
+	int id ;        // a unique id for this bucket, equal to the first address
+                    // in the table which points to it
+	int depth ;     // number of hash value bits being used by this bucket
+	int nkeys ;     // number of keys currently contained in this bucket
+	int64 *keys ;   // the keys stored in this bucket
 } Bucket ;
 
 typedef struct stats {
-	int nbuckets ;	// number of distinct buckets does the table point to
-	int nkeys ;		// number of keys being stored in the table
-	int time ;		// CPU time elapsed to insert/lookup keys in this table
+	int nbuckets ;  // number of distinct buckets does the table point to
+	int nkeys ;     // number of keys being stored in the table
+	int time ;      // CPU time elapsed to insert/lookup keys in this table
 } Stats ;
 
 // a hash table is an array of slots pointing to buckets holding up to 
 // bucketsize keys, along with some information about the number of hash value 
 // bits to use for addressing
 struct xtndbln_table {
-	Bucket **buckets ;	// array of pointers to buckets
-	int size ;			// number of entries in the table of pointers (2^depth)
-	int depth ;			// how many bits of the hash value to use (log2(size))
-	int bucketsize ;	// maximum number of keys per bucket
+	Bucket **buckets ;  // array of pointers to buckets
+	int size ;          // number of entries in the table of pointers (2^depth)
+	int depth ;         // how many bits of the hash value to use (log2(size))
+	int bucketsize ;    // maximum number of keys per bucket
 	Stats stats ;
 } ;
 
@@ -47,7 +47,7 @@ struct xtndbln_table {
  * helper functions
  */
 
-// create a new empty bucket with first_address as its id
+// creates a new empty bucket with first_address as its id
 static Bucket *new_bucket(int first_address, int depth, int bucketsize) {
 	Bucket *bucket = malloc(sizeof *bucket) ; 
 	assert(bucket) ;
@@ -62,14 +62,14 @@ static Bucket *new_bucket(int first_address, int depth, int bucketsize) {
 	return bucket ;
 }
 
-// double the table of bucket pointers, duplicating pointers from 1st
+// doubles the table of bucket pointers, duplicating pointers from 1st
 //  half of table into 2nd
 static void double_xn_table(XtndblNHashTable *table) {
 
 	int size = table->size * 2 ;
 	assert (size < MAX_TABLE_SIZE && "error: table has grown too large!") ;
 
-	// new array of double the number of bucket pointers
+	// create new array of double the number of bucket pointers
 	table->buckets = realloc(table->buckets, (sizeof *table->buckets) * size) ;
 	assert (table->buckets) ;
 	// copy the pointers down the array
@@ -83,7 +83,7 @@ static void double_xn_table(XtndblNHashTable *table) {
 	table->depth++ ;
 }
 
-// reinsert a key into an extendible hash table
+// reinserts a key into an extendible hash table
 //  for use only when a bucket has been split & its keys removed
 static void reinsert_key(XtndblNHashTable *table, int64 key) {
 	int address = rightmostnbits(table->depth, h1(key)) ;
@@ -93,7 +93,7 @@ static void reinsert_key(XtndblNHashTable *table, int64 key) {
 	table->buckets[address]->nkeys++ ;
 }
 
-// split the bucket in an extendible table at address, grow table if necessary
+// splits the bucket in an extendible table at address, grows table if necessary
 static void split_xn_bucket(XtndblNHashTable *table, int address) {
 
 	// check if table growth is needed
@@ -148,7 +148,11 @@ static void split_xn_bucket(XtndblNHashTable *table, int address) {
 	/* ------------------------------------- */
 }
 
-// initialise an extendible hash table with the given keys per bucket
+/* * * *
+ * main functions
+ */
+
+// initialises an extendible hash table with the given keys per bucket
 XtndblNHashTable *new_xtndbln_hash_table(int bucketsize) {
 	XtndblNHashTable *table = malloc(sizeof *table) ;
 	assert(table) ;
@@ -171,8 +175,7 @@ XtndblNHashTable *new_xtndbln_hash_table(int bucketsize) {
 	return table ;
 }
 
-
-// free all memory associated with a given extendible hash table
+// frees all memory associated with a given extendible hash table
 void free_xtndbln_hash_table(XtndblNHashTable *table) {
 	assert(table) ;
 
@@ -189,7 +192,7 @@ void free_xtndbln_hash_table(XtndblNHashTable *table) {
 	free(table) ;
 }
 
-// insert a new key into an extendible hash table
+// inserts a new key into an extendible hash table
 // returns true if successful, false if the key was already present
 bool xtndbln_hash_table_insert(XtndblNHashTable *table, int64 key) {
 	assert (table) ;
@@ -231,8 +234,7 @@ bool xtndbln_hash_table_insert(XtndblNHashTable *table, int64 key) {
 	return true ;
 }
 
-
-// lookup whether a key is inside an extendible table
+// looks up whether a key is inside an extendible hash table
 // returns true if found, false if not
 bool xtndbln_hash_table_lookup(XtndblNHashTable *table, int64 key) {
 	assert(table) ;
@@ -257,8 +259,7 @@ bool xtndbln_hash_table_lookup(XtndblNHashTable *table, int64 key) {
 	return false ;
 }
 
-
-// print the contents of an extendible hash table to stdout
+// prints the contents of an extendible hash table to stdout
 void xtndbln_hash_table_print(XtndblNHashTable *table) {
 	assert(table);
 	printf("--- table size: %d\n", table->size);
@@ -295,7 +296,7 @@ void xtndbln_hash_table_print(XtndblNHashTable *table) {
 	printf("--- end table ---\n");
 }
 
-// print statistics about an extendible hash table to stdout
+// prints statistics about an extendible hash table to stdout
 void xtndbln_hash_table_stats(XtndblNHashTable *table) {
 	assert(table) ;
 

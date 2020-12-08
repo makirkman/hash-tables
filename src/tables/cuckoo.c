@@ -16,10 +16,10 @@
 // hash table. it stores two parallel arrays: 'slots' stores the keys and
 // 'inuse' is a boolean indicating if a slot is filled
 typedef struct inner_table {
-	int64 *slots ;	// array of slots holding keys
-	bool  *inuse ;	// this slot is in use or not
-	int    load  ;	// total number of inuse slots
-	int    id    ;	// this table's id number (1 or 2)
+	int64 *slots ;  // array of slots holding keys
+	bool  *inuse ;  // array indicating if a slot is in use or not
+	int    load  ;  // total number of inuse slots
+	int    id    ;  // this table's id number (1 or 2)
 } InnerTable ;
 
 // a hash table which stores its keys in two inner tables
@@ -34,7 +34,7 @@ struct cuckoo_table {
  * helper functions
  */
 
-// initialises the internal arrays of a single cuckoo inner table
+// initialise the internal arrays of a single cuckoo inner table
 static void initialise_in_table(InnerTable *table, int size) {
 	assert(size < MAX_TABLE_SIZE && "error: table has grown too large!") ;
 
@@ -51,7 +51,7 @@ static void initialise_in_table(InnerTable *table, int size) {
 
 }
 
-// helpter function to cleanly insert key into table at hash
+// cleanly inserts a key into the given table, at hash index
 //  for use only when address is known to be empty
 static void clean_insert(InnerTable *table, int64 key, int hash) {
 	assert(table->inuse[hash] == false) ;
@@ -61,7 +61,7 @@ static void clean_insert(InnerTable *table, int64 key, int hash) {
 	table->load++ ;
 }
 
-// doubles cuckoo table size & rehashes its contents
+// doubles cuckoo hash table size & rehashes its contents
 static void double_cuckoo_table(CuckooHashTable *hash_table) {
 
 	int o_size = hash_table->size ;
@@ -96,7 +96,7 @@ static void double_cuckoo_table(CuckooHashTable *hash_table) {
 	free(old_inuse_table2) ;
 }
 
-// inserts key into table & displaces old key into other table
+// inserts a given key into a table & displaces the old key into the other table
 //  if the current key has been tried before, doubles & rehashes both tables
 static void in_table_insert(CuckooHashTable *hash_table, InnerTable *table,
   int64 cur_key, int64 init_key) {
@@ -150,7 +150,7 @@ static void in_table_insert(CuckooHashTable *hash_table, InnerTable *table,
  * main functions
  */
 
-// initialise a cuckoo hash table with the given size
+// initialises a cuckoo hash table with the given size
 CuckooHashTable *new_cuckoo_hash_table(int size) {
 
 	CuckooHashTable *hash_table = malloc((sizeof *hash_table) * size) ;
@@ -163,7 +163,7 @@ CuckooHashTable *new_cuckoo_hash_table(int size) {
 	initialise_in_table(hash_table->table2, size) ;
 	hash_table->table1->id = 1 ;
 	hash_table->table2->id = 2 ;
-	/* ------------------------------------------ */
+	/* -------------------------------------------- */
 	
 	// prepare high level details
 	hash_table->size = size ;
@@ -172,7 +172,7 @@ CuckooHashTable *new_cuckoo_hash_table(int size) {
 }
 
 
-// free all memory associated with a given cuckoo hash table
+// frees all memory associated with a given cuckoo hash table
 void free_cuckoo_hash_table(CuckooHashTable *hash_table) {
 	assert(hash_table != NULL) ;
 
@@ -187,8 +187,7 @@ void free_cuckoo_hash_table(CuckooHashTable *hash_table) {
 	free(hash_table) ;
 }
 
-
-// insert a new key into a cuckoo hash table
+// inserts a new key into a cuckoo hash table
 // returns true if successful, false if the key was already present
 bool cuckoo_hash_table_insert(CuckooHashTable *hash_table, int64 key) {
 	assert(hash_table != NULL) ;
@@ -234,7 +233,7 @@ bool cuckoo_hash_table_insert(CuckooHashTable *hash_table, int64 key) {
 	/* ------------------------------------------------------ */
 }
 
-// lookup whether a key is inside a cuckoo table
+// looks up whether a key is inside a cuckoo hash table
 // returns true if found, false if not
 bool cuckoo_hash_table_lookup(CuckooHashTable *hash_table, int64 key) {
 	assert (hash_table != NULL) ;
@@ -260,7 +259,7 @@ bool cuckoo_hash_table_lookup(CuckooHashTable *hash_table, int64 key) {
 	}
 }
 
-// print the contents of a cuckoo hash table to stdout
+// prints the contents of a cuckoo hash table to stdout
 void cuckoo_hash_table_print(CuckooHashTable *hash_table) {
 	assert(hash_table) ;
 	printf("--- table size: %d\n", hash_table->size) ;
@@ -294,8 +293,7 @@ void cuckoo_hash_table_print(CuckooHashTable *hash_table) {
 	printf("--- end table ---\n") ;
 }
 
-
-// print some statistics about 'hash_table' to stdout
+// prints statistics about a cuckoo hash table to stdout
 void cuckoo_hash_table_stats(CuckooHashTable *hash_table) {
 
 	assert(hash_table != NULL) ;
