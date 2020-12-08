@@ -174,7 +174,7 @@ static void split_xuck_bucket(XuckooHashTable *hash_table, InnerTable *table, in
 	/* ----------------------------------------------------------- */
 	
 	// remove and reinsert the key
-	o_bucket->full = false;
+	o_bucket->full = false ;
 	reinsert(table, o_bucket->key) ;
 }
 
@@ -247,7 +247,7 @@ XuckooHashTable *new_xuckoo_hash_table() {
 	/* -------------------------------------------- */
 
 	hash_table->time = 0 ;
-	return hash_table;
+	return hash_table ;
 }
 
 // frees all memory associated with a given extendible cuckoo hash table
@@ -336,7 +336,7 @@ bool xuckoo_hash_table_lookup(XuckooHashTable *hash_table, int64 key) {
 	}
 
 	hash_table->time += clock() - start_time ;
-	return found;
+	return found ;
 }
 
 
@@ -386,13 +386,13 @@ void xuckoo_hash_table_stats(XuckooHashTable *hash_table) {
 	int total_buckets = hash_table->table1->nbuckets +
 	  hash_table->table2->nbuckets ;
 	int total_keys = hash_table->table1->nkeys + hash_table->table2->nkeys ;
-	float seconds = hash_table->time * 1.0 / CLOCKS_PER_SEC;
+	float seconds = hash_table->time * 1.0 / CLOCKS_PER_SEC ;
 
 	printf("\n----- table stats -----\n") ;
 
 	// print high level cuckoo table info
 	printf("\n    --- overall ---\n") ;
-	printf("CPU time spent   :\t%.6f sec\n", seconds);
+	printf("CPU time spent   :\t%.6f sec\n", seconds) ;
 	printf("total size       :\t%d potential slots\n", total_size) ;
 	printf("total keys       :\t%d\n", total_keys) ;
 	printf("total buckets    :\t%d\n", total_buckets) ;
@@ -418,5 +418,5 @@ void xuckoo_hash_table_stats(XuckooHashTable *hash_table) {
 	printf("    ---------------\n") ;
 	printf("\n   --- end stats ---\n") ;
 
-	return;
+	return ;
 }
