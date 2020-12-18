@@ -276,7 +276,7 @@ void xtndbln_hash_table_print(XtndblNHashTable *table) {
 
 		// if this is the first address at which a bucket occurs, print it now
 		if (table->buckets[i]->id == i) {
-			printf("%9d ", table->buckets[i]->id ;
+			printf("%9d ", table->buckets[i]->id) ;
 
 			// print the bucket's contents
 			printf("[") ;
