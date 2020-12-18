@@ -16,10 +16,27 @@ The hashing strategies available are:
 ### Build
 To build, simply run `make` in the program directory.
 
+To clean the program folder after a build, run `make clean` - this will call `rm -f` for all .o files.
+
+To clean the program folder of all build files and the executable, run `make clobber` - this will call `rm -f` for all .o files and the executable.
+
 ### Run
 To run, run the executable, with the desired arguments.
 
-The program requires one argument to start: `-t` (table type to use), with the optional \[ `-s` \] (initial table size / bucket size). This will create the desired hash table in memory, and initiate the interpreter to allow commands to be given.
+The program requires one argument to start: `-t` (table type to use), and can take the optional \[ `-s` \] argument to specify initial table size or bucket size for Cuckoo and Extendible tables respectively. This will create the desired hash table in memory, and initiate the interpreter to allow commands to be given.
+
+There are three options for `-t`:
+
+| -t  | Table Type        |
+| --- | ----------------- |
+| 0   | Cuckoo            |
+| 1   | Extendible        |
+| 2   | Extendible Cuckoo |
+
+An example command:
+```
+./ht -t 1 -s 16
+```
 
 ### Interact
 Once the program is running, commands can be given individually to manipulate or see details about the table. Options are: insert (`i`), lookup (`l`), print the table (`p`) or print statistics about it (`s`), get help (`h`), or quit (`q`).
@@ -29,7 +46,9 @@ Once the program is running, commands can be given individually to manipulate or
 ### Quick Test
 To get a quick look at the behaviour of the program on a large collection of commands, there is a `sample-input.txt` file, containing 100,000 `i` commands, 100,000 `l` commands, a `p`, and an `s`, in that order. This can be fed into the program by first building it, but instead of running the interpreter, giving the following command:
 
-```./ht -t <table_type> < sample-input.txt```
+```
+./ht -t <table_type> < sample-input.txt
+```
 
 The output of the sample commands when given for each type of hash table are stored in respective files in the `sample-output` folder. The statistics at the bottom of the output files allow a user to see the behaviour of each table without needing to build and run the program directly.
 
